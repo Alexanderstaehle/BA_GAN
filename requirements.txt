@@ -1,0 +1,6 @@
+numpy
+pandas
+s2sphere
+sklearn
+geopy
+folium
