@@ -38,13 +38,12 @@ if not (os.path.isdir(p)):
     p.mkdir()
 
 
-# Concat all user_month files
+# Concat all user files
 userPath = os.path.join(dataDir, user, 'Trajectory', '*')
 allDirs = glob.glob(userPath)
 my_map = folium.Map(location=[39.9075, 116.39723], zoom_start=14)
 raw_data = pd.DataFrame(columns=gpsHeader)
 for entry in allDirs:
-    # np.genfromtxt(entry, delimiter=',', skip_header=6, dtype='U')
     raw_data = pd.concat(
         [raw_data,
          pd.DataFrame(np.genfromtxt(entry, delimiter=',', skip_header=6, dtype='U'), columns=gpsHeader)])

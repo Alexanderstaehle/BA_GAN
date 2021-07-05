@@ -1,12 +1,14 @@
 import csv
+import os
+from pathlib import Path
+
+import folium
 import numpy as np
 import pandas as pd
 import s2sphere
-import utils
-import folium
-import os
-from pathlib import Path
 from sklearn.preprocessing import MinMaxScaler
+
+import utils
 
 
 # convert an array of values into a dataset matrix
@@ -19,7 +21,8 @@ def create_dataset(data, look_back=1):
     return np.array(data_x), np.array(data_y)
 
 
-with open('../data/xyz.csv', 'r') as f:
+with open('../data/xyz.csv', 'r', ) as f:
+    next(f)
     gps_logs = csv.reader(f)
 
     raw_logs = []
@@ -33,6 +36,8 @@ with open('../data/xyz.csv', 'r') as f:
     df['Latitude'] = pd.to_numeric(df['Latitude'])
     df['Longitude'] = pd.to_numeric(df['Longitude'])
     df['Time'] = pd.to_numeric(df['Time'])
+
+    timestamps = df['Time']
 
     borderbox = utils.fetchGeoLocation('Geneva, Suisse')
     # df = utils.dropOutlyingData(df, borderbox)
@@ -64,17 +69,30 @@ with open('../data/xyz.csv', 'r') as f:
     # normalize the dataset
     scaler = MinMaxScaler(feature_range=(0, 1))
     dataset = scaler.fit_transform(dataset)
+
+    # timestamps = scaler.fit_transform(timestamps[0:1000])
+    # dataset = np.c_[dataset, timestamps]
+
     # AB HIER DANN IN DER RICHTIGEN IMPLEMENTIERUNG
     # split into train and test sets
-    train_size = int(len(dataset) * 0.99)
-    test_size = len(dataset) - train_size
-    train, test = dataset[0:train_size, :], dataset[train_size:len(dataset), :]
+    train_size = int(len(dataset) * 0.85)
+    test_size = int(len(dataset) * 0.10)
+    validation_size = len(dataset) - train_size - test_size
+    train, test, validation = dataset[0:train_size, :], dataset[train_size:len(dataset), :], dataset[
+                                                                                             train_size + test_size:len(
+                                                                                                 dataset), :]
 
     # reshape into X=t and Y=t+1
     look_back = 1
     trainX, trainY = create_dataset(train, look_back)
     testX, testY = create_dataset(test, look_back)
+    validationX, validationY = create_dataset(validation, look_back)
 
     # reshape input to be [samples, time steps, features]
     trainX = np.reshape(trainX, (trainX.shape[0], trainX.shape[1], 1))
     testX = np.reshape(testX, (testX.shape[0], testX.shape[1], 1))
+    validationX = np.reshape(validationX, (validationX.shape[0], validationX.shape[1], 1))
+
+    np.save('../data/preprocessed/train.npy', trainX)
+    np.save('../data/preprocessed/test.npy', testX)
+    np.save('../data/preprocessed/validation.npy', validationX)

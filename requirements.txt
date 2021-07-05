@@ -4,3 +4,6 @@ s2sphere
 sklearn
 geopy
 folium
+keras
+tensorflow
+matplotlib
