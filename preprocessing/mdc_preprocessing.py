@@ -6,9 +6,12 @@ import folium
 import numpy as np
 import pandas as pd
 import s2sphere
+from keras.preprocessing.sequence import pad_sequences
 from sklearn.preprocessing import MinMaxScaler
 
 import utils
+
+max_length = 144
 
 
 # convert an array of values into a dataset matrix
@@ -43,6 +46,9 @@ with open('../data/xyz.csv', 'r', ) as f:
     # df = utils.dropOutlyingData(df, borderbox)
     points = list(zip(df.Latitude, df.Longitude))
     my_map = folium.Map(location=[46.3615142, 6.399388], zoom_start=10)
+    borderbox = np.array(borderbox).astype(np.float)
+    borderbox = [(borderbox[0], borderbox[2]), (borderbox[1], borderbox[3]), (borderbox[0], borderbox[3]), (borderbox[1], borderbox[2])]
+    folium.Rectangle(borderbox, color="blue", opacity=0.5).add_to(my_map)
     folium.PolyLine(points, color="red", weight=2.5, opacity=1).add_to(my_map)
     out_path = os.path.join(Path(__file__).parent, 'plots', 'MDC')
     my_map.save(f"{out_path}.html")
@@ -64,16 +70,25 @@ with open('../data/xyz.csv', 'r', ) as f:
     df = pd.DataFrame(dataset)
     dataset = df.values
     dataset = dataset.astype('float64')
-    dataset = dataset[0:1000]
 
     # normalize the dataset
     scaler = MinMaxScaler(feature_range=(0, 1))
     dataset = scaler.fit_transform(dataset)
 
+    # TODO: Hier fehlt eine Unterteilung in einzelne Trajectories anstatt diesem Workaround
+    dataset = np.array(np.array_split(dataset, 675), dtype=object)
+    dataset = dataset[..., np.newaxis]
+
+    dataset = [pad_sequences(f, max_length, padding='pre', dtype='float64') for f in dataset]
+    # reshape input to be [samples, time steps, features]
+    dataset = np.reshape(dataset, (len(dataset), max_length, 1))
+
+    # Rescale -1 to 1
+    dataset = (dataset.astype(np.float64) - 127.5) / 127.5
+
     # timestamps = scaler.fit_transform(timestamps[0:1000])
     # dataset = np.c_[dataset, timestamps]
 
-    # AB HIER DANN IN DER RICHTIGEN IMPLEMENTIERUNG
     # split into train and test sets
     train_size = int(len(dataset) * 0.85)
     test_size = int(len(dataset) * 0.10)
@@ -83,16 +98,11 @@ with open('../data/xyz.csv', 'r', ) as f:
                                                                                                  dataset), :]
 
     # reshape into X=t and Y=t+1
-    look_back = 1
-    trainX, trainY = create_dataset(train, look_back)
-    testX, testY = create_dataset(test, look_back)
-    validationX, validationY = create_dataset(validation, look_back)
+    # look_back = 1
+    # trainX, trainY = create_dataset(train, look_back)
+    # testX, testY = create_dataset(test, look_back)
+    # validationX, validationY = create_dataset(validation, look_back)
 
-    # reshape input to be [samples, time steps, features]
-    trainX = np.reshape(trainX, (trainX.shape[0], trainX.shape[1], 1))
-    testX = np.reshape(testX, (testX.shape[0], testX.shape[1], 1))
-    validationX = np.reshape(validationX, (validationX.shape[0], validationX.shape[1], 1))
-
-    np.save('../data/preprocessed/train.npy', trainX)
-    np.save('../data/preprocessed/test.npy', testX)
-    np.save('../data/preprocessed/validation.npy', validationX)
+    np.save('../data/preprocessed/train.npy', train)
+    np.save('../data/preprocessed/test.npy', test)
+    np.save('../data/preprocessed/validation.npy', validation)

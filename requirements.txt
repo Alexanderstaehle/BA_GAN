@@ -7,3 +7,4 @@ folium
 keras
 tensorflow
 matplotlib
+tensorflow-addons
