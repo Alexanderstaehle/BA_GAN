@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 import folium
+import joblib
 import numpy as np
 import pandas as pd
 import s2sphere
@@ -74,6 +75,8 @@ with open('../data/xyz.csv', 'r', ) as f:
     # normalize the dataset
     scaler = MinMaxScaler(feature_range=(0, 1))
     dataset = scaler.fit_transform(dataset)
+    scaler_filename = "scaler.pkl"
+    joblib.dump(scaler, scaler_filename)
 
     # TODO: Hier fehlt eine Unterteilung in einzelne Trajectories anstatt diesem Workaround
     dataset = np.array(np.array_split(dataset, 675), dtype=object)
