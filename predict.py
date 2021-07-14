@@ -10,7 +10,7 @@ import tensorflow as tf
 from lstmwgan_2 import WGANGP
 
 latent_dim = 100
-n_epochs = 3
+n_epochs = 50
 if __name__ == '__main__':
     random_latent_vectors = tf.random.normal(shape=(5, latent_dim))
     gan = WGANGP()
