@@ -1,6 +1,4 @@
 import itertools
-import os
-from pathlib import Path
 
 import folium
 import joblib

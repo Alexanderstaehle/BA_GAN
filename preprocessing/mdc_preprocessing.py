@@ -41,6 +41,16 @@ with open('../data/xyz.csv', 'r', ) as f:
     df['Longitude'] = pd.to_numeric(df['Longitude'])
     df['Time'] = pd.to_numeric(df['Time'])
 
+    lat_centroid = df['Latitude'].sum() / len(df)
+    lon_centroid = df['Longitude'].sum() / len(df)
+    scale_factor = max(max(abs(df['Latitude'].max() - lat_centroid),
+                           abs(df['Latitude'].min() - lat_centroid),
+                           ),
+                       max(abs(df['Longitude'].max() - lon_centroid),
+                           abs(df['Longitude'].min() - lon_centroid),
+                           ))
+    joblib.dump(scale_factor, 'scale_factor.pkl')
+
     timestamps = df['Time']
 
     borderbox = utils.fetchGeoLocation('Geneva, Suisse')
@@ -48,7 +58,8 @@ with open('../data/xyz.csv', 'r', ) as f:
     points = list(zip(df.Latitude, df.Longitude))
     my_map = folium.Map(location=[46.3615142, 6.399388], zoom_start=10)
     borderbox = np.array(borderbox).astype(np.float)
-    borderbox = [(borderbox[0], borderbox[2]), (borderbox[1], borderbox[3]), (borderbox[0], borderbox[3]), (borderbox[1], borderbox[2])]
+    borderbox = [(borderbox[0], borderbox[2]), (borderbox[1], borderbox[3]), (borderbox[0], borderbox[3]),
+                 (borderbox[1], borderbox[2])]
     folium.Rectangle(borderbox, color="blue", opacity=0.5).add_to(my_map)
     folium.PolyLine(points, color="red", weight=2.5, opacity=1).add_to(my_map)
     out_path = os.path.join(Path(__file__).parent, 'plots', 'MDC')
