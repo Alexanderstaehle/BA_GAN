@@ -34,8 +34,6 @@ if __name__ == '__main__':
     heatmap, xedges, yedges = np.histogram2d(gen_lng, gen_lat, bins=20)
     heatmap2, xedges2, yedges2 = np.histogram2d(real_lng, real_lat, bins=20)
 
-    # extent = [min(xedges[0], xedges2[0]), max(xedges[-1], xedges2[-1]), min(yedges[0], yedges2[0]),
-    #          max(yedges[-1], yedges2[-1])]
     extent = [0, 50, 0, 50]
     fig, (ax1, ax2) = plt.subplots(ncols=2)
     im1 = ax1.imshow(heatmap.T, extent=extent, origin='lower')
