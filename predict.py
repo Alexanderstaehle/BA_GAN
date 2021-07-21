@@ -4,11 +4,11 @@ import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
 
-from lstmwgan_trajgen import WGANGP
+from lstmwgan import WGANGP
 from preprocessing.utils import decodeTrajectories
 
 latent_dim = 100
-n_epochs = 60
+n_epochs = 50
 
 if __name__ == '__main__':
     real_trajectories = np.load('data/preprocessed/train.npy', allow_pickle=True)
@@ -18,7 +18,7 @@ if __name__ == '__main__':
     gen_inputs.append(real_trajectories)
     gen_inputs.append(random_latent_vectors)
     gan = WGANGP()
-    gan.generator.load_weights('parameters/G_model4_' + str(n_epochs) + '.h5')  # params/G_model_2000.h5
+    gan.generator.load_weights('parameters/G_model6_' + str(n_epochs) + '.h5')  # params/G_model_100.h5
     generated_trajectories = gan.generator(gen_inputs).numpy()
     scaler = joblib.load("preprocessing/scaler.pkl")
     gen_lat, gen_lng = decodeTrajectories(generated_trajectories, scaler)

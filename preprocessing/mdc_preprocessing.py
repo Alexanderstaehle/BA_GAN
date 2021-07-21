@@ -90,6 +90,7 @@ with open('../data/xyz.csv', 'r', ) as f:
     joblib.dump(scaler, scaler_filename)
 
     # TODO: Hier fehlt eine Unterteilung in einzelne Trajectories anstatt diesem Workaround
+    # Vlt splitten in stündliche Trajectories
     # dataset = np.array(np.array_split(dataset, 675), dtype=object)
     dataset = np.array([dataset[i:i + np.random.randint(low=120, high=140)] for i in range(0, len(dataset))], dtype=object)
     dataset = dataset[..., np.newaxis]
