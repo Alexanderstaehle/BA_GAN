@@ -104,8 +104,10 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.venv7
 env/
 venv/
+venv7/
 ENV/
 env.bak/
 venv.bak/
@@ -130,4 +132,6 @@ dmypy.json
 
 data/
 .idea
-plots/
+/parameters/
+/preprocessing/plots/
+/heatmaps/

@@ -94,16 +94,12 @@ with open('../data/xyz.csv', 'r', ) as f:
     # dataset = np.array(np.array_split(dataset, 675), dtype=object)
     dataset = np.array([dataset[i:i + np.random.randint(low=120, high=140)] for i in range(0, len(dataset))], dtype=object)
     dataset = dataset[..., np.newaxis]
-
     dataset = [pad_sequences(f, max_length, padding='pre', dtype='float64') for f in dataset]
     # reshape input to be [samples, time steps, features]
     dataset = np.reshape(dataset, (len(dataset), max_length, 1))
 
     # Rescale -1 to 1
     dataset = (dataset.astype(np.float64) - 127.5) / 127.5
-
-    # timestamps = scaler.fit_transform(timestamps[0:1000])
-    # dataset = np.c_[dataset, timestamps]
 
     # split into train and test sets
     train_size = int(len(dataset) * 0.85)
